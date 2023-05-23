@@ -16,6 +16,24 @@ def test_apply_discount(item):
     item.apply_discount()
     assert item.price == 10000.0
 
+def test_name():
+    item = Item('Телефон', 10000, 5)
+    item.name = 'Смартфон'
+    item.name = 'СуперМегаПуперСмартфог'
+    assert item.name == 'Смартфон'
+
+def test_instantiate_from_csv():
+    item = Item('Телефон', 10000, 5)
+    item.instantiate_from_csv()
+    assert len(Item.all) == 5
+
+def test_string_to_number():
+    assert Item.string_to_number('1') == 1
+    assert Item.string_to_number('1.0') == 1
+    assert Item.string_to_number('1.5') == 1
+
+
+
 
 
 
