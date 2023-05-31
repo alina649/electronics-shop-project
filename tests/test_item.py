@@ -4,6 +4,7 @@ import pytest
 from pytest import fixture
 
 from src.item import Item
+from src.phone import Phone
 
 @fixture
 def item():
@@ -11,6 +12,7 @@ def item():
 
 def test_calculate_total_price(item):
     assert item.calculate_total_price() == 200000
+
 
 def test_apply_discount(item):
     item.apply_discount()
@@ -36,6 +38,11 @@ def test_str_repr():
     item1 = Item("Смартфон", 200, 10)
     assert repr(item1) == "Item('Смартфон', 200, 10)"
     assert str(item1) == 'Смартфон'
+
+def test_add(item):
+    item2 = Phone("Смартфон", 120_000, 5, 2)
+    assert item2 + item == 25
+    assert item2 + item2 == 10
 
 
 
