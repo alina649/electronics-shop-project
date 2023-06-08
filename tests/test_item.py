@@ -3,7 +3,7 @@
 import pytest
 from pytest import fixture
 
-from src.item import Item
+from src.item import Item,InstantiateCSVError, FileNotFoundCSVError
 from src.phone import Phone
 
 @fixture
@@ -44,6 +44,14 @@ def test_add(item):
     assert item2 + item == 25
     assert item2 + item2 == 10
 
+def test_instantiate_from_csv():
+    # Проверка ошибок
+    # Тест ошибки "Нет файла"
+    with pytest.raises(FileNotFoundCSVError):
+        Item.csv_reader('../src/items20.csv')
+    # Тест ошибки "файл поврежден"
+    with pytest.raises(InstantiateCSVError):
+        Item.csv_reader('../src/items3.csv')
 
 
 

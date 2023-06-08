@@ -2,6 +2,20 @@ import csv
 import os
 
 
+class InstantiateCSVError(Exception):
+    """Класс-исключение для отлавливания ошибки, если файл поврежден"""
+
+    def __init__(self):
+        self.message = '_InstantiateCSVError: Файл item.csv поврежден_'
+
+
+class FileNotFoundCSVError(InstantiateCSVError):
+    """Класс-исключение для отлавливания ошибки, если файл отсутствует"""
+
+    def __init__(self):
+        self.message = '_FileNotFoundError: Отсутствует файл item.csv_'
+
+
 class Item:
     """
     Класс для представления товара в магазине.
@@ -28,17 +42,11 @@ class Item:
     def __str__(self):
         return f'{self.name}'
 
-    #def __add__(self, other):
-    #    if not isinstance(other, Item):
-    #        raise ValueError('Нельзя складывать.')
-    #    return int(self.quantity) + int(other.quantity)
+
     def __add__(self, other):
         if issubclass(other.__class__, self.__class__):
             return int(self.quantity) + int(other.quantity)
         raise ValueError('Нельзя складывать.')
-
-
-
 
 
     @property
@@ -46,12 +54,10 @@ class Item:
         return self._name
 
     @name.setter
-    def name(self, new_name):
-        try:
-            if len(new_name) <= 10:
-                self._name = new_name
-        except Exception:
-            return ("длина наименования товара больше 10 символов")
+    def name(self, value: str):
+        if len(value) > 10:
+            raise Exception('Длина товара превышает 10 символов.')
+        self._name = value
 
     def calculate_total_price(self) -> float:
         """
@@ -68,15 +74,39 @@ class Item:
         self.price *= self.pay_rate
 
     @classmethod
-    def instantiate_from_csv(cls):
-        cls.all.clear()
-        #dir_path = os.path.dirname(os.path.realpath(__file__))
-        #with open(dir_path + '/items.csv', encoding='utf-8') as csvfile:
-        file = os.path.abspath('../src/items.csv')
-        with open(file, encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                cls(row['name'], row['price'], row['quantity'])
+    def csv_reader(cls, filename):
+        '''
+        класс-метод, читающий файл и инициализирующий экземпляры
+        класса `Item` данными из этого файла
+        '''
+
+        try:
+            cls.all.clear()
+
+            with open(filename, newline='') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    cls(row['name'], row['price'], row['quantity'])
+
+                    if not row['name'] or not row['price'] or not row['quantity']:
+                        raise InstantiateCSVError
+                if len(cls.all) <= 0:
+                    raise InstantiateCSVError
+
+        except FileNotFoundError:
+            raise FileNotFoundCSVError
+        except KeyError:
+            raise InstantiateCSVError
+
+    @classmethod
+    def instantiate_from_csv(cls) -> None:
+        '''класс-метод, инициализирующий данными из файла _src/items.csv'''
+        try:
+            cls.csv_reader('../src/items.csv')
+        except FileNotFoundCSVError as ex:
+            print(ex.message)
+        except InstantiateCSVError as ex:
+            print(ex.message)
 
     @staticmethod
     def string_to_number(num):
